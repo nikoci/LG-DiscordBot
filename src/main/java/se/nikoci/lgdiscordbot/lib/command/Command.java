@@ -79,6 +79,7 @@ public interface Command {
             }
         }
 
+        event.deferReply().complete();
         event.getHook().sendMessage("Executed " + getName() + " command.").setEphemeral(true).queue();
         getLogger().info("User [{}] executed command '{}'", event.getUser().getId(), getName());
     }

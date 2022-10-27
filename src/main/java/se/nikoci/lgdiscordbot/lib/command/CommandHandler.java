@@ -23,6 +23,7 @@ public class CommandHandler extends ListenerAdapter {
         instance.setCommandHandler(this);
     }
 
+    //TODO: Implement checking for subcommands and handle them accordingly, calling the right execute method.
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         if (!event.getMessage().getContentRaw().startsWith(this.instance.getPrefix())) return;
@@ -54,6 +55,7 @@ public class CommandHandler extends ListenerAdapter {
         }
     }
 
+    //TODO: Implement checking CommandData for Options and SubCommands and handle them accordingly, calling the right execute method.
     @Override
     public void onSlashCommand(@NotNull SlashCommandEvent event) {
         Member member = event.getMember();
@@ -70,6 +72,7 @@ public class CommandHandler extends ListenerAdapter {
             if (member.hasPermission(command.getPermissions())) {
                 command.execute(event);
             } else {
+                event.deferReply().complete();
                 event.getHook().sendMessage("You do not have permission for this command.").setEphemeral(true).queue();
             }
         } else {
