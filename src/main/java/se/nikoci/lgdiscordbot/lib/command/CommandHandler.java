@@ -1,23 +1,27 @@
 package se.nikoci.lgdiscordbot.lib.command;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.nikoci.lgdiscordbot.lib.Bot;
 
-@RequiredArgsConstructor
+import java.util.ArrayList;
+import java.util.List;
+
 public class CommandHandler extends ListenerAdapter {
 
-    private Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Bot instance;
 
-    @NonNull private Bot instance;
+    public CommandHandler(Bot instance){
+        this.instance = instance;
+        instance.setCommandHandler(this);
+    }
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
@@ -26,7 +30,7 @@ public class CommandHandler extends ListenerAdapter {
 
         Member member = event.getMember();
         String label = event.getMessage().getContentRaw().split(" ")[0].replaceFirst(this.instance.getPrefix(), "");
-        Command command = this.instance.getCommand(label);
+        Command command = getCommand(label);
 
         System.out.println("LABEL: " + label);
         System.out.println("COMMAND: " + command);
@@ -53,7 +57,7 @@ public class CommandHandler extends ListenerAdapter {
     @Override
     public void onSlashCommand(@NotNull SlashCommandEvent event) {
         Member member = event.getMember();
-        Command command = instance.getCommand(event.getName());
+        Command command = getCommand(event.getName());
 
         if (command == null) return;
 
@@ -71,9 +75,65 @@ public class CommandHandler extends ListenerAdapter {
         } else {
             command.execute(event);
         }
-
-
     }
 
+    public void addCommand(@NotNull Command command){
+        //restrict adding multiple with the same name
+        for (var entrySet : instance.getCommands().entrySet()){
+            if (entrySet.getKey().equalsIgnoreCase(command.getName())){
+                logger.error("Cannot add command with the same name");
+                return;
+            }
+        }
 
+        instance.getCommands().put(command.getName(), command);
+        updateCommandData();
+    }
+
+    public void removeCommand(@NotNull Command command){
+        removeCommand(command.getName());
+    }
+
+    public void removeCommand(@NotNull String commandName){
+        instance.getCommands().forEach((name, cmd) -> {
+            if (name.equalsIgnoreCase(commandName)) instance.getCommands().remove(name, cmd);
+        });
+    }
+
+    public Command getCommand(@NotNull String name){
+        for (var entrySet : instance.getCommands().entrySet()){
+            if (entrySet.getKey().equalsIgnoreCase(name)){
+                return entrySet.getValue();
+            }
+        }
+        return null;
+    }
+
+    public void addCommands(Command @NotNull ... commands){
+        for (Command command : commands) addCommand(command);
+    }
+
+    public void removeCommands(Command @NotNull ... commands){
+        for (Command command : commands) removeCommand(command);
+    }
+
+    //Updates command data for jda, only Command obj's that accept slash commands will be updated.
+    private void updateCommandData(){
+        List<CommandData> commandDataList = new ArrayList<>();
+
+        instance.getCommands().forEach((name, cmd) -> {
+            //Make sure we only select Command objects that accept slash commands
+            if (cmd.getCommandType().contains(CommandType.GUILD_SLASH)
+                    || cmd.getCommandType().contains(CommandType.DM_SLASH)
+                    || cmd.getCommandType().contains(CommandType.ALL)){
+                commandDataList.add(cmd.getCommandData());
+            }
+        });
+
+        instance.getJda()
+                .updateCommands()
+                .addCommands(commandDataList)
+                .queue();
+
+    }
 }

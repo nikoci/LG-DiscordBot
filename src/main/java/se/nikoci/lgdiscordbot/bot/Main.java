@@ -26,8 +26,8 @@ public class Main {
             ));
 
             //TODO: Find a better way to pass the Bot instance to the CommandHandler instance
-            bot.setCommandHandler(new CommandHandler(bot));
-            bot.addCommand(new TestCommand());
+            CommandHandler commandHandler = new CommandHandler(bot);
+            commandHandler.addCommand(new TestCommand());
         } else {
             Bot.logger.error("Bot token not provided!");
             System.exit(1);
