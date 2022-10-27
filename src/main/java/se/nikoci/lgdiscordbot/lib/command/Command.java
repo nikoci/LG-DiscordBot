@@ -33,18 +33,15 @@ public interface Command {
         return new Command[0];
     }
 
-    default Collection<OptionData> getOptionData(){
-        return null;
-    }
+    default Collection<OptionData> getOptionData(){return Set.of();}
 
     default CommandData getCommandData(){
         List<SubcommandData> subcommandDataList = new ArrayList<>();
 
         //Loops through all subcommands to create a SubCommandData object for each, also adds their OptionData to the SubCommandData obj
         for (Command command : getSubcommands()){
-            SubcommandData subcommandData = new SubcommandData(command.getName(), command.getDescription());
-            if (command.getCommandData() != null) subcommandData.addOptions(command.getOptionData());
-            subcommandDataList.add(subcommandData);
+            subcommandDataList.add(new SubcommandData(command.getName(), command.getDescription())
+                    .addOptions(command.getOptionData()));
         }
 
         //Returning the CommandData obj with all it's subcommands and data.
@@ -70,7 +67,7 @@ public interface Command {
 
         event.getChannel().sendMessage("Executed " + getName() + " command.").queue();
         getLogger().info("User [{}] executed command '{}'", event.getAuthor().getId(), getName());
-    };
+    }
 
 
     default void execute(SlashCommandEvent event){
@@ -84,10 +81,5 @@ public interface Command {
 
         event.getHook().sendMessage("Executed " + getName() + " command.").setEphemeral(true).queue();
         getLogger().info("User [{}] executed command '{}'", event.getUser().getId(), getName());
-    };
-
-
-    /*default CommandData getCommandData()
-        //return new CommandData(this.getName(), this.getDescription());
-    }*/
+    }
 }
