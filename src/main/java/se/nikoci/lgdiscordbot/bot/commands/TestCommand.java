@@ -22,9 +22,4 @@ public class TestCommand implements Command {
     public Collection<Permission> getPermissions() {
         return Set.of(Permission.ADMINISTRATOR);
     }
-
-    @Override
-    public Command[] getSubcommands() {
-        return new Command[]{() -> "test2", () -> "test3"};
-    }
 }
