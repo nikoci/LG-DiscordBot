@@ -1,0 +1,4 @@
+#!/bin/bash
+
+mvn clean package
+exec java -jar ./target/LG-DiscordBot-1.0.0.jar $1
