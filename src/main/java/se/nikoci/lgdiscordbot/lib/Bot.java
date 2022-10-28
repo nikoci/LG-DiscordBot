@@ -4,11 +4,14 @@ import lombok.Data;
 import lombok.NonNull;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.nikoci.lgdiscordbot.lib.command.Command;
 import se.nikoci.lgdiscordbot.lib.command.CommandHandler;
+import se.nikoci.lgdiscordbot.lib.command.CommandType;
 
 import javax.security.auth.login.LoginException;
 import java.util.*;
@@ -34,31 +37,9 @@ public class Bot {
         bots.add(this);
     }
 
-    public void addCommand(Command command){
-        //restrict adding multiple with the same name
-        for (var entrySet : commands.entrySet()){
-            if (entrySet.getKey().equalsIgnoreCase(command.getName())){
-                logger.error("Cannot add command with the same name");
-                return;
-            }
-        }
-
-        //Check for the CommandType and updateSlashCommand accordingly
-
-
+    public void setCommandHandler(@NotNull CommandHandler commandHandler){
+        if (this.commandHandler != null) jda.removeEventListener(this.commandHandler);
+        this.commandHandler = commandHandler;
+        jda.addEventListener(commandHandler);
     }
-
-    private void updateSlashCommand(){
-
-    }
-
-    public Command getCommand(String name){
-        for (var entrySet : commands.entrySet()){
-            if (entrySet.getKey().equalsIgnoreCase(name)){
-                return entrySet.getValue();
-            }
-        }
-        return null;
-    }
-
 }

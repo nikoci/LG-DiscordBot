@@ -2,6 +2,7 @@ package se.nikoci.lgdiscordbot.bot;
 
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.jetbrains.annotations.NotNull;
+import se.nikoci.lgdiscordbot.bot.commands.TestCommand;
 import se.nikoci.lgdiscordbot.lib.Bot;
 import se.nikoci.lgdiscordbot.lib.command.CommandHandler;
 
@@ -25,7 +26,8 @@ public class Main {
             ));
 
             //TODO: Find a better way to pass the Bot instance to the CommandHandler instance
-            bot.setCommandHandler(new CommandHandler(bot));
+            CommandHandler commandHandler = new CommandHandler(bot);
+            commandHandler.addCommand(new TestCommand());
         } else {
             Bot.logger.error("Bot token not provided!");
             System.exit(1);
